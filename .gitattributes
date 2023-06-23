@@ -1,0 +1,5 @@
+# all 'checked in' files will be stored with ls as their eol
+* text=auto
+
+install text eol=lf
+*.sh    text eol=lf

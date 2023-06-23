@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# install --- Install the WezTerm config files
+
+# Mike Barker <mike@thebarkers.com>
+# June 23rd, 2023
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+# Backup a file/directory by renaming it with the current date and time
+backup_file() {
+	local file=$1
+	local file_ext=""
+
+	if [ -e "${file}" ]; then
+		if ! [ -h "${file}" ]; then
+            file_ext=$(date +%Y%m%d%H%M)
+			echo "Backing up ${file} to: ${file}.${file_ext}"
+			mv "${file}" "${file}.${file_ext}"
+		fi
+	fi
+}
+
+# create a symbolic link if one does not allready exist, overwriting an
+# existing symbolic link.
+link_file() {
+    local src=$1
+    local dst=$2
+
+    if ! [ -e "${dst}" ]; then
+        echo "Linking: ${dst} to ${src}"
+        ln -sfn "${src}" "${dst}"
+    fi
+}
+
+# loop through a set of files specified by a glob patern
+# backup and link the files found.
+link_all_files() {
+    local src=$1
+    local dst=$2
+    local file
+
+    shopt -s nullglob
+    shopt -s dotglob
+
+    for fullpath in "${src}"/*; do
+        file=$(basename "$fullpath")
+        backup_file "${dst}/$file"
+        link_file "${src}/$file" "${dst}/$file"
+    done
+
+    shopt -u dotglob
+    shopt -u nullglob
+}
+
+# Get the script's directory and change into it
+DIR="$(cd "$(dirname "$0")" && pwd)"
+pushd "${DIR}" > /dev/null || exit
+
+DST_DIR=${HOME}/.config
+
+# Make sure there is a config dir
+if [ ! -d "${DST_DIR}" ]; then
+    mkdir -p "${DST_DIR}"
+fi
+
+# Link all items in the config directory to the users config directory
+SRC_DIR=${DIR}/home/.config
+link_all_files "${SRC_DIR}" "${DST_DIR}"
