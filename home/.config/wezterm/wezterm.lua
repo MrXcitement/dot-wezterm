@@ -39,5 +39,8 @@ config.font = wezterm.font_with_fallback {
     'Courier New',
     'monospace',
 }
+-- change the font size
+config.font_size = 14.0
+
 -- and finally, return the configuration to wezterm
 return config
