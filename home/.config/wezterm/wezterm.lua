@@ -27,6 +27,11 @@ function scheme_for_appearance(appearance)
   end
 end
 
+-- Handle different platforms
+if wezterm.target_triple:find "windows" then
+    config.default_prog = {"pwsh"}
+end
+
 -- changing the color scheme:
 config.color_scheme = scheme_for_appearance(get_appearance())
 
